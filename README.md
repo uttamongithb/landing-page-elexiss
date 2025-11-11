@@ -34,3 +34,22 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Fonts
+
+- Global default: Inter is loaded via `next/font` and applied with `className="font-sans"` on `<body>`.
+- Rethink Sans: Opt-in anywhere with the utility class `font-rethink`.
+- Spot Mono Medium: Opt-in anywhere with the utility class `font-spot`.
+
+To use Spot Mono Medium as a webfont, add the files under `public/fonts/spot-mono/`:
+
+- `public/fonts/spot-mono/SpotMono-Medium.woff2` (preferred)
+- `public/fonts/spot-mono/SpotMono-Medium.woff` (optional fallback)
+
+Then, in your components:
+
+```tsx
+<code className="font-spot">monospaced sample</code>
+```
+
+If the files are not present, the `font-spot` utility will gracefully fall back to the system `monospace` font.

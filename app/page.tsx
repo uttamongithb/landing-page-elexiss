@@ -1,65 +1,208 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+
+
+
+import React, { useEffect, useRef, useState } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+
+gsap.registerPlugin(ScrollTrigger);
+
+const homepage = () => {
+
+    const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'categories'>('dashboard')
+    const textRef = useRef(null);
+
+    useEffect(() => {
+        const ctx = gsap.context(() => {
+            gsap.to(textRef.current, {
+                y: -150,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: textRef.current,
+                    start: "top top",
+                    end: "bottom top",
+                    scrub: true,
+                },
+            });
+        });
+
+        return () => ctx.revert();
+    }, []);
+
+    const image = {
+        dashboard: `/dashboard.png`,
+        products: `/products.png`,
+        categories: `/categories.png`
+
+    }
+
+
+
+    return (
+        <>
+            <div className='bg-[#030712]'>
+
+                <div ref={textRef} className='flex pt-64'>
+                    <div className={'text-[#ffffff]  pl-108 font-rethink'}>
+                        <h1 className={`text-[92px] h-24 font-semibold`}>Engineer better </h1>
+                        <h1 className={`text-[92px] font-semibold`}>protiens, faster.</h1>
+                    </div>
+                    <div className={`text-[#ffffff] mt-21 ml-30 font-rethink`}>
+                        <p>Leverage AI to generate protein</p>
+                        <p>candidates and improve their</p>
+                        <p>properties. More breakthroughs</p>
+                        <p>in fewer experiments — guided</p>
+                        <p>by your own experimental data.</p>
+
+                    </div>
+                </div>
+
+
+                <div>
+                    <div className=' flex justify-center mb-10 mt-8 '>
+                        <div className='border-[0.1px] border-white p-3 rounded-xl'>
+                            <div className="border border-gray-200 rounded-xl bg-white shadow-sm p-4 duration-300">
+                                <img src={image[activeTab]} className='w-[1080px] pb-20 mt-20' alt="" />
+
+
+                            </div>
+                        </div>
+
+                    </div>
+                    <div className="text-[#ffffff] flex justify-center pb-20 gap-x-1">
+                        <div className="cursor-pointer" onClick={() => { setActiveTab("dashboard") }}>
+                            <div className={` h-1 rounded-3xl  mb-3 duration-500 ${activeTab == 'dashboard' ? 'bg-blue-600 w-80' : 'bg-[#ffffff14] w-50'}`}></div>
+                            <span className="font-semibold pl-px">Dashboard</span>
+                        </div>
+                        <div className="cursor-pointer" onClick={() => { setActiveTab("products") }}>
+                            <div className={` h-1 rounded-3xl  mb-3 duration-500 ${activeTab == 'products' ? 'bg-blue-600 w-80' : 'bg-[#ffffff14] w-50'}`}></div>
+                            <span className="font-semibold pl-px">Products</span>
+                        </div>
+                        <div className="cursor-pointer" onClick={() => { setActiveTab("categories") }}>
+                            <div className={` h-1 rounded-3xl  mb-3 duration-500 ${activeTab == 'categories' ? 'bg-blue-600 w-80' : 'bg-[#ffffff14] w-50'}`}></div>
+                            <span className="font-semibold pl-px">Categories</span>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+
+
+
+
+            <div className=" pt-30 pb-30       bg-transparent bg-linear-to-b from-[#f9fafb] to-[#f9fafb]">
+                <div className="ml-77">
+                    <div className="flex  items-center gap-5 " >
+                        <div className="bg-[#3d66f8] h-2 w-2 rounded-xs  "></div>
+                        <h3 className={`text-[18px]  font-bold text-[#616E80] font-spot`}>TRUSTED BY THE BEST</h3>
+                    </div>
+                    <div className=" text-[#030712]">
+                        <p className="font-rethink font-semibold text-[64px] h-16 tracking-tight">Scientific teams at Novo </p>
+                        <p className="font-rethink font-semibold text-[64px] h-16 tracking-tight">Nordisk, Johnson & Johnson,</p>
+                        <p className="font-rethink font-semibold text-[64px] h-16 tracking-tight">and IFF all use Cradle to</p>
+                        <p className="font-rethink font-semibold text-[64px] h-16 tracking-tight">engineer proteins faster.</p>
+                    </div>
+                </div>
+
+
+
+
+                <div className="ml-77 mt-15 mb-20 flex gap-5">
+                    <div>
+                        <div className="flex gap-5 mt-5 ml-1" >
+                            <div className="border bg-[#ffffff] border-[#e7eaee] h-40 w-[285px] rounded-lg"></div>
+                            <div className="border bg-[#ffffff] border-[#e7eaee] h-40 w-[285px] rounded-lg"></div>
+                        </div>
+                        <div className="flex gap-5 mt-5 ml-1" >
+                            <div className="border bg-[#ffffff] border-[#e7eaee] h-40 w-[285px] rounded-lg"></div>
+                            <div className="border bg-[#ffffff] border-[#e7eaee] h-40 w-[285px] rounded-lg"></div>
+                        </div>
+                        <div className="flex gap-5 mt-5 ml-1" >
+                            <div className="border bg-[#ffffff] border-[#e7eaee] h-40 w-[285px] rounded-lg"></div>
+                            <div className="border bg-[#ffffff] border-[#e7eaee] h-40 w-[285px] rounded-lg"></div>
+                        </div>
+
+                    </div>
+                    <div className="w-[670px] h-[520px] border border-[#e7eaee] bg-[#ffffff] rounded-lg mt-5">
+                        <div className=" font-rethink font-semibold  text-[32px] m-10 tracking-tight">
+                            <p className="h-10">"Cradle’s AI-based protein design</p>
+                            <p className="h-10">platform provides easy access and</p>
+                            <p className="h-10">acceleration to protein optimization</p>
+                            <p className="h-10">for the discovery pipeline."</p>
+                        </div>
+
+                    </div>
+                </div>
+
+                <hr className="border-[#e7eaee]" />
+
+
+                <div className="ml-77 mt-20">
+                    <h3 className="font-rethink text-[#030712] text-[32px] font-semibold ml-1">Case studies</h3>
+                    <div className="mt-10 flex gap-6">
+                        <div className="w-[413px] text-[#616E80] font-semibold cursor-pointer hover:text-black">
+                            <div className="w-[413px] h-[219px] rounded-lg ">
+                                <img src='https://images.pexels.com/photos/695644/pexels-photo-695644.jpeg' alt="img" className="w-full h-full rounded-lg object-cover object-center" />
+                            </div>
+                            <div className="mt-5">
+                                <p>Optimizing Cetuximab: An update on our win of the Adaptyv 2024 competition</p>
+                            </div>
+                        </div>
+
+                        <div className="w-[413px] text-[#616E80] font-semibold cursor-pointer hover:text-black">
+                            <div className="w-[413px] h-[219px] rounded-lg ">
+                                <img src='https://images.pexels.com/photos/695644/pexels-photo-695644.jpeg' alt="img" className="w-full h-full rounded-lg object-cover object-center" />
+                            </div>
+                            <div className="mt-5">
+                                <p>Optimizing Cetuximab: An update on our win of the Adaptyv 2024 competition</p>
+                            </div>
+                        </div>
+
+                        <div className="w-[413px] text-[#616E80] font-semibold cursor-pointer hover:text-black">
+                            <div className="w-[413px] h-[219px] rounded-lg ">
+                                <img src='https://images.pexels.com/photos/695644/pexels-photo-695644.jpeg' alt="img" className="w-full h-full rounded-lg object-cover object-center" />
+                            </div>
+                            <div className="mt-5">
+                                <p>Optimizing Cetuximab: An update on our win of the Adaptyv 2024 competition</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+
+
+
+            <div className="bg-[#ffffff] h-1000 pt-30">
+                <div className="ml-77">
+                    <div className="flex  items-center gap-5 " >
+                        <div className="bg-[#3d66f8] h-2 w-2 rounded-xs  "></div>
+                        <h3 className={`text-[18px]  font-bold text-[#616E80] font-spot`}>PROTEIN ENGINEERING 2.0</h3>
+                    </div>
+                    <div className=" text-[#030712]">
+                        <p className="font-rethink font-semibold text-[64px] h-16 tracking-tight">Compounding results  </p>
+                        <p className="font-rethink font-semibold text-[64px] h-16">across all properties.</p>
+                    </div>
+
+                    <div className="  mt-15 text-[#616E80] font-semibold text-[20px]">
+                        <p>Get products to market in quarters, not years. Use Cradle to chart</p>
+                        <p>the fastest course to proteins that meet all your desired </p>
+                        <p>objectives. Explore further, optimize faster, and reach your</p>
+                        <p>destination in fewer experiments.</p>
+                    </div>
+                </div>
+
+
+            </div>
+
+
+        </>
+    )
 }
+
+export default homepage
