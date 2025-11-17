@@ -1,791 +1,359 @@
 "use client";
 
-
-
-
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-
 gsap.registerPlugin(ScrollTrigger);
 
-const homepage = () => {
+export default function LongLandingWithGSAP() {
+  const heroRef = useRef<HTMLDivElement | null>(null);
+  const headlineRef = useRef<HTMLHeadingElement | null>(null);
+  const ctaRef = useRef<HTMLAnchorElement | null>(null);
+  const demoCtaRef = useRef<HTMLAnchorElement | null>(null);
+  const cardRefs = useRef<HTMLDivElement[]>([]);
+  const badgeRef = useRef<HTMLDivElement | null>(null);
+  const mockRef = useRef<HTMLDivElement | null>(null);
 
-    const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'categories'>('dashboard')
-    const textRef = useRef(null);
+  // sections refs for staggered reveal
+  const featureRefs = useRef<HTMLDivElement[]>([]);
+  const problemRefs = useRef<HTMLLIElement[]>([]);
+  const industryRefs = useRef<HTMLDivElement[]>([]);
+  const testimonialRefs = useRef<HTMLDivElement[]>([]);
 
-    useEffect(() => {
-        const ctx = gsap.context(() => {
-            gsap.to(textRef.current, {
-                y: -150,
-                ease: "none",
-                scrollTrigger: {
-                    trigger: textRef.current,
-                    start: "top top",
-                    end: "bottom top",
-                    scrub: true,
-                },
-            });
+  const setRef = (refArray: React.MutableRefObject<any[]>, el: HTMLElement | null) => {
+    if (!el) return;
+    if (!refArray.current.includes(el)) refArray.current.push(el);
+  };
+
+  useEffect(() => {
+    // reduce motion on small devices
+    const disableAnimations = window.matchMedia("(prefers-reduced-motion: reduce)").matches || window.innerWidth < 640;
+
+    const ctx = gsap.context(() => {
+      if (!disableAnimations) {
+        // Hero entrance
+        const tl = gsap.timeline();
+        tl.from(badgeRef.current, { y: -40, opacity: 0, duration: 0.6, ease: "power2.out" })
+          .from(headlineRef.current?.querySelectorAll('.hero-line'), {
+            y: -60,
+            opacity: 0,
+            duration: 0.9,
+            stagger: 0.2,
+            ease: "power3.out"
+          }, "-=0.2")
+          .from(heroRef.current?.querySelector('p'), {
+            y: -40,
+            opacity: 0,
+            duration: 0.7,
+            ease: "power2.out"
+          }, "-=0.3")
+          .from([ctaRef.current, demoCtaRef.current], {
+            y: 40,
+            opacity: 0,
+            duration: 0.6,
+            ease: "power2.out"
+          })
+          
+          .from(cardRefs.current, {
+            y: -20,
+            opacity: 0,
+            stagger: 0.08,
+            duration: 0.6,
+            ease: "power3.out"
+          }, "-=0.4");
+
+        // Parallax mock
+        gsap.to(mockRef.current, {
+          y: -80,
+          rotation: 0.4,
+          ease: "none",
+          scrollTrigger: {
+            trigger: heroRef.current || undefined,
+            start: "top top",
+            end: "bottom top",
+            scrub: true,
+          },
         });
 
-        return () => ctx.revert();
-    }, []);
-
-
-    const box1Ref = useRef(null);
-    const box2Ref = useRef(null);
-    const containerRef = useRef(null);
-
-    useEffect(() => {
-        const ctx = gsap.context(() => {
-            // Black box moves diagonally down-right
-            gsap.to(box1Ref.current, {
-                x: -15,
-                y: -15,
-                ease: "power2.inOut",
-                scrollTrigger: {
-                    trigger: containerRef.current,
-                    start: "top bottom", // start when section enters viewport
-                    end: "bottom 40%", // end near bottom
-                    scrub: true, // smooth motion tied to scroll
-                    // markers: true, // uncomment for debug
-                },
-            });
-
-            // White box moves diagonally up-left (opposite)
-            gsap.to(box2Ref.current, {
-                x: 15,
-                y: 15,
-                ease: "power2.inOut",
-                scrollTrigger: {
-                    trigger: containerRef.current,
-                    start: "top bottom",
-                    end: "bottom 40%",
-                    scrub: true,
-                    // markers: true,
-                },
-            });
+        // Feature cards reveal on scroll
+        featureRefs.current.forEach((el) => {
+          gsap.from(el, {
+            y: 30,
+            opacity: 0,
+            duration: 0.8,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: el,
+              start: "top 85%",
+            },
+          });
         });
 
-        return () => ctx.revert();
-    }, []);
-
-
-
-
-
-    useEffect(() => {
-        const sections = gsap.utils.toArray<HTMLElement>(".section");
-
-        sections.forEach((section) => {
-            const box = section.querySelector(".pin-box");
-
-            ScrollTrigger.create({
-                trigger: section,
-                pin: box,
-                start: "top 7%",
-                end: "bottom 17%",
-                scrub: true,
-            });
+        // Problem bullets stagger
+        problemRefs.current.forEach((el, i) => {
+          gsap.from(el, {
+            x: -20,
+            opacity: 0,
+            duration: 0.6,
+            delay: i * 0.08,
+            scrollTrigger: { trigger: el, start: "top 90%" },
+          });
         });
-    }, []);
 
-
-
-    const image = {
-        dashboard: `/dashboard.png`,
-        products: `/products.png`,
-        categories: `/categories.png`
-
-    }
-
-
-
-    return (
-        <>
-            <div className="w-full overflow-x-hidden">
-                <div className='bg-[#030712]'>
-
-                    <div ref={textRef} className='flex pt-64 justify-center'>
-                        <div className={'text-[#ffffff]  font-rethink'}>
-                            <h1 className={`text-[92px] h-24 font-semibold`}>Engineer better </h1>
-                            <h1 className={`text-[92px] font-semibold`}>protiens, faster.</h1>
-                        </div>
-                        <div className={`text-[#ffffff] mt-21 ml-30 font-rethink`}>
-                            <p>Leverage AI to generate protein</p>
-                            <p>candidates and improve their</p>
-                            <p>properties. More breakthroughs</p>
-                            <p>in fewer experiments — guided</p>
-                            <p>by your own experimental data.</p>
-
-                        </div>
-                    </div>
-
-
-                    <div>
-                        <div className=' flex justify-center mb-10 mt-8 '>
-                            <div className='border-[0.1px] border-white p-3 rounded-xl'>
-                                <div className="border border-gray-200 rounded-xl bg-white shadow-sm p-4 duration-300">
-                                    <img src={image[activeTab]} className='w-[1080px] pb-20 mt-20' alt="" />
-
-
-                                </div>
-                            </div>
-
-                        </div>
-                        <div className="text-[#ffffff] flex justify-center pb-20 gap-x-1">
-                            <div className="cursor-pointer" onClick={() => { setActiveTab("dashboard") }}>
-                                <div className={` h-1 rounded-3xl  mb-3 duration-500 ${activeTab == 'dashboard' ? 'bg-blue-600 w-80' : 'bg-[#ffffff14] w-50'}`}></div>
-                                <span className="font-semibold pl-px">Dashboard</span>
-                            </div>
-                            <div className="cursor-pointer" onClick={() => { setActiveTab("products") }}>
-                                <div className={` h-1 rounded-3xl  mb-3 duration-500 ${activeTab == 'products' ? 'bg-blue-600 w-80' : 'bg-[#ffffff14] w-50'}`}></div>
-                                <span className="font-semibold pl-px">Products</span>
-                            </div>
-                            <div className="cursor-pointer" onClick={() => { setActiveTab("categories") }}>
-                                <div className={` h-1 rounded-3xl  mb-3 duration-500 ${activeTab == 'categories' ? 'bg-blue-600 w-80' : 'bg-[#ffffff14] w-50'}`}></div>
-                                <span className="font-semibold pl-px">Categories</span>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-
-
-
-
-
-                <div className=" pt-30 pb-30  w-full flex   flex-col items-center  bg-transparent bg-linear-to-b from-[#f9fafb] to-[#f9fafb]">
-                    <div>
-                        <div >
-                            <div className="flex  items-center gap-5 " >
-                                <div className="bg-[#3d66f8] h-2 w-2 rounded-xs  "></div>
-                                <h3 className={`text-[18px]  font-bold text-[#616E80] font-spot`}>TRUSTED BY THE BEST</h3>
-                            </div>
-                            <div className=" text-[#030712]">
-                                <p className="font-rethink font-semibold text-[64px] h-16 tracking-tight">Scientific teams at Novo </p>
-                                <p className="font-rethink font-semibold text-[64px] h-16 tracking-tight">Nordisk, Johnson & Johnson,</p>
-                                <p className="font-rethink font-semibold text-[64px] h-16 tracking-tight">and IFF all use Cradle to</p>
-                                <p className="font-rethink font-semibold text-[64px] h-16 tracking-tight">engineer proteins faster.</p>
-                            </div>
-                        </div>
-
-
-
-
-                        <div className=" mt-15 mb-20 flex gap-5">
-                            <div>
-                                <div className="flex gap-5 mt-5 ml-1" >
-                                    <div className="border bg-[#ffffff] border-[#e7eaee] h-40 w-[285px] rounded-lg"></div>
-                                    <div className="border bg-[#ffffff] border-[#e7eaee] h-40 w-[285px] rounded-lg"></div>
-                                </div>
-                                <div className="flex gap-5 mt-5 ml-1" >
-                                    <div className="border bg-[#ffffff] border-[#e7eaee] h-40 w-[285px] rounded-lg"></div>
-                                    <div className="border bg-[#ffffff] border-[#e7eaee] h-40 w-[285px] rounded-lg"></div>
-                                </div>
-                                <div className="flex gap-5 mt-5 ml-1" >
-                                    <div className="border bg-[#ffffff] border-[#e7eaee] h-40 w-[285px] rounded-lg"></div>
-                                    <div className="border bg-[#ffffff] border-[#e7eaee] h-40 w-[285px] rounded-lg"></div>
-                                </div>
-
-                            </div>
-                            <div className="w-[670px] h-[520px] border border-[#e7eaee] bg-[#ffffff] rounded-lg mt-5">
-                                <div className=" font-rethink font-semibold  text-[32px] m-10 tracking-tight">
-                                    <p className="h-10">"Cradle’s AI-based protein design</p>
-                                    <p className="h-10">platform provides easy access and</p>
-                                    <p className="h-10">acceleration to protein optimization</p>
-                                    <p className="h-10">for the discovery pipeline."</p>
-                                </div>
-
-                            </div>
-                        </div>
-
-
-
-
-
-                    </div>
-
-
-                    <hr className="border-[#e7eaee] w-full" />
-
-                    <div className=" mt-20 ">
-                        <div>
-
-                            <h3 className="font-rethink text-[#030712] text-[32px] font-semibold ">Case studies</h3>
-
-                            <div className="mt-10 flex gap-6">
-                                <div className="w-[413px] text-[#616E80] font-semibold cursor-pointer hover:text-black">
-                                    <div className="w-[413px] h-[219px] rounded-lg ">
-                                        <img src='https://images.pexels.com/photos/695644/pexels-photo-695644.jpeg' alt="img" className="w-full h-full rounded-lg object-cover object-center" />
-                                    </div>
-                                    <div className="mt-5">
-                                        <p>Optimizing Cetuximab: An update on our win of the Adaptyv 2024 competition</p>
-                                    </div>
-                                </div>
-
-                                <div className="w-[413px] text-[#616E80] font-semibold cursor-pointer hover:text-black">
-                                    <div className="w-[413px] h-[219px] rounded-lg ">
-                                        <img src='https://images.pexels.com/photos/695644/pexels-photo-695644.jpeg' alt="img" className="w-full h-full rounded-lg object-cover object-center" />
-                                    </div>
-                                    <div className="mt-5">
-                                        <p>Optimizing Cetuximab: An update on our win of the Adaptyv 2024 competition</p>
-                                    </div>
-                                </div>
-
-                                <div className="w-[413px] text-[#616E80] font-semibold cursor-pointer hover:text-black">
-                                    <div className="w-[413px] h-[219px] rounded-lg ">
-                                        <img src='https://images.pexels.com/photos/695644/pexels-photo-695644.jpeg' alt="img" className="w-full h-full rounded-lg object-cover object-center" />
-                                    </div>
-                                    <div className="mt-5">
-                                        <p>Optimizing Cetuximab: An update on our win of the Adaptyv 2024 competition</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-
-
-                </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                <div className="bg-[#ffffff] pb-35 pt-30 flex flex-col items-center">
-                    <div>
-                        <div >
-                            <div className="flex  items-center gap-5 " >
-                                <div className="bg-[#3d66f8] h-2 w-2 rounded-xs  "></div>
-                                <h3 className={`text-[18px]  font-bold text-[#616E80] font-spot`}>PROTEIN ENGINEERING 2.0</h3>
-                            </div>
-                            <div className=" text-[#030712]">
-                                <p className="font-rethink font-semibold text-[64px] h-16 tracking-tight">Compounding results  </p>
-                                <p className="font-rethink font-semibold text-[64px] h-16">across all properties.</p>
-                            </div>
-
-                            <div className="  mt-15 text-[#616E80] font-semibold text-[20px]">
-                                <p>Get products to market in quarters, not years. Use Cradle to chart</p>
-                                <p>the fastest course to proteins that meet all your desired </p>
-                                <p>objectives. Explore further, optimize faster, and reach your</p>
-                                <p>destination in fewer experiments.</p>
-                            </div>
-                        </div>
-
-
-                        <div className=" flex mt-20 gap-6 ">
-                            <div className="w-[760px] h-[635px] bg-[#f2f4f7] rounded-2xl">
-                                <div className="flex mt-23 ml-39">
-                                    <div className="w-[256px] h-[180px] bg-black rounded-2xl"></div>
-                                    <div className="w-[256px] h-[180px] bg-white rounded-2xl ml-[-60px] mt-[75px]"></div>
-
-
-                                </div>
-
-                                <div className="mt-30 ml-10">
-                                    <p className="text-[24px] text-[#030712] font-semibold font-rethink ">Compounding results</p>
-                                    <div className="text-[16px] text-[#616E80] font-semibold mt-5">
-                                        <p>Move from incremental progress to compounding results with</p>
-                                        <p>models that learn from every round of your wet lab data. Teams</p>
-                                        <p>that use Cradle report 1.5-12x faster development timelines.</p>
-                                    </div>
-                                </div>
-
-                            </div>
-
-
-
-
-
-                            <div className="w-[500px] h-[635px] bg-black rounded-2xl">
-                                <div className="mt-8 ml-10">
-                                    <p className="text-[24px] text-[#ffffff] font-semibold font-rethink ">Breakthroughs on repeat</p>
-                                    <div className="text-[16px] text-[#FFFFFF99] font-semibold mt-4">
-                                        <p>Following a single path puts you at risk of hitting</p>
-                                        <p>a dead end. Instead, confidently explore multiple</p>
-                                        <p>design strategies to bring more programs over</p>
-                                        <p>the finish line and strengthen your IP portfolio.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-
-
-
-
-
-                        <div className=" flex mt-20 gap-6 ">
-                            <div className="w-[500px] h-[610px] bg-[#f2f4f7] rounded-2xl">
-
-
-                            </div>
-
-
-
-
-
-                            <div className="w-[760px] h-[610px] bg-[#f2f4f7] rounded-2xl">
-                                <div className="mt-8 ml-10">
-                                    <p className="text-[24px] text-[#030712] font-semibold font-rethink ">Co-optimize all your properties</p>
-                                    <div className="text-[16px] text-[#616E80] font-semibold mt-3">
-                                        <p>Activity, binding, stability, expression, and more. Co-optimize the properties you</p>
-                                        <p>care about, turning complex trade-offs into optimized solutions in fewer rounds.</p>
-
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-
-
-
-
-
-                <div className="bg-[#030712] h-220 flex gap-10 pt-10 justify-center">
-
-
-                    <div >
-                        <div className="flex  items-center gap-5 " >
-                            <div className="bg-[#3d66f8] h-2 w-2 rounded-xs  "></div>
-                            <h3 className={`text-[18px]  font-bold text-[#616E80] font-spot`}>WORK ON ANY PROTEIN</h3>
-                        </div>
-                        <div className=" text-[#ffffff]">
-                            <p className="font-rethink font-semibold text-[64px] h-16 tracking-tight">Built for any protein</p>
-                            <p className="font-rethink font-semibold text-[64px] h-16">and all properties.</p>
-                        </div>
-
-                        <div className="  mt-15 text-[#616E80] font-semibold text-[20px]">
-                            <p>Accelerate your journey from hit identification to lead</p>
-                            <p>optimization and beyond. If you can measure it, you can optimize</p>
-                            <p>it with Cradle.</p>
-                        </div>
-                        <div className="  mt-5 text-[#616E80] font-semibold text-[20px]">
-                            <p>This makes Cradle fit-for-purpose for teams developing</p>
-                            <p>therapeutics, agricultural solutions, food ingredients, and more.</p>
-                        </div>
-                    </div>
-
-                    <div className="mt-8">
-                        <div>
-                            <p className="text-[#ffffff] text-[18px] font-semibold font-rethink mt-5">Antibodies</p>
-                            <p className="text-[16px] font-semibold text-[#616E80]">Craft mature and developable binders that avoid </p>
-                            <p className="text-[16px] font-semibold text-[#616E80]">unwanted immunogenicity.</p>
-                        </div>
-                        <div>
-                            <p className="text-[#ffffff] text-[18px] font-semibold font-rethink mt-5">Enzymes</p>
-                            <p className="text-[16px] font-semibold text-[#616E80]">Accelerate specific catalytic conversions, even in</p>
-                            <p className="text-[16px] font-semibold text-[#616E80]">challenging conditions.</p>
-                        </div>
-                        <div>
-                            <p className="text-[#ffffff] text-[18px] font-semibold font-rethink mt-5">Vaccines</p>
-                            <p className="text-[16px] font-semibold text-[#616E80]">Stabilize your antigens and hit therapeutic goals</p>
-                            <p className="text-[16px] font-semibold text-[#616E80]">faster.</p>
-                        </div>
-                        <div>
-                            <p className="text-[#ffffff] text-[18px] font-semibold font-rethink mt-5">Peptides</p>
-                            <p className="text-[16px] font-semibold text-[#616E80]">Get to desired efficacy while ensuring stability.</p>
-                        </div>
-                    </div>
-
-                </div>
-
-
-
-
-                <div className="pt-15 flex flex-col items-center w-full">
-                    <div>
-                        <div >
-                            <div className="flex  items-center gap-5 " >
-                                <div className="bg-[#3d66f8] h-2 w-2 rounded-xs  "></div>
-                                <h3 className={`text-[18px]  font-bold text-[#616E80] font-spot`}>HOW CRADLE WORKS</h3>
-                            </div>
-                            <div className=" text-[#030712]">
-                                <p className="font-rethink font-semibold text-[64px] h-16 tracking-tight">Design in Cradle.</p>
-                                <p className="font-rethink font-semibold text-[64px] h-16">Validate in the lab.</p>
-                            </div>
-
-                            <div className="  mt-15 text-[#616E80] font-semibold text-[20px]">
-                                <p>Quickly generate lab-ready protein candidates to test in your</p>
-                                <p>own lab or with a CRO. Track model and candidate performance</p>
-                                <p>in your reports. Learn every time you add assay data.</p>
-                            </div>
-
-                        </div>
-
-
-
-
-                        <div ref={containerRef} className=" w-7xl h-[732px] flex items-center justify-center bg-[#616E80] rounded-2xl mt-15">
-                            <div className="flex   justify-center  mb-15">
-                                <div ref={box1Ref} className="w-[380px] mt-20 h-[250px] bg-black rounded-2xl ml-10"></div>
-                                <div ref={box2Ref} className="w-[380px] h-[250px] bg-white rounded-2xl ml-[-190px] mt-[220px]"></div>
-                            </div>
-
-                        </div>
-
-
-                    </div>
-
-                </div>
-
-
-
-                <div>
-                    <div className="w-full mt-10 flex flex-col items-center ">
-                        <div>
-                            <p className="text-[120px]  font-rethink font-semibold text-[#030712] ml-25">Learn</p>
-
-                            <div className=" section flex gap-10   ">
-                                <div className="pin-box w-14 h-14 bg-[#3d66f8] rounded-2xl text-[24px] flex justify-center items-center font-rethink text-[#ffffff] font-semibold"><p>1</p></div>
-                                <div>
-                                    <div className="flex gap-10 mb-10">
-                                        <div className="w-[572px] h-[448px] bg-[#f2f4f7] rounded-2xl"></div>
-
-                                        <div className="w-[572px] h-[448px] ">
-                                            <p className="font-rethink text-[#030712] text-[32px] font-semibold  tracking-tight">Import your data</p>
-                                            <div className="  mt-5 text-[#616E80] font-semibold text-[16px] tracking-tight">
-                                                <p>To begin, upload wet lab data from screening</p>
-                                                <p>or optimization experiments. If you're</p>
-                                                <p>starting a project from scratch, simply</p>
-                                                <p>define your goals and assays to get going.</p>
-                                            </div>
-                                        </div>
-
-                                    </div>
-
-                                    <div className="flex gap-10 mb-10">
-                                        <div className="w-[572px] h-[448px] bg-[#f2f4f7] rounded-2xl"></div>
-
-                                        <div className="w-[572px] h-[448px] ">
-                                            <p className="font-rethink text-[#030712] text-[32px] font-semibold  tracking-tight">Explore your data quality</p>
-                                            <div className="  mt-5 text-[#616E80] font-semibold text-[16px] tracking-tight">
-                                                <p>Cradle automatically analyses your experimental</p>
-                                                <p>data to determine data quality and AI’s</p>
-                                                <p>ability to learn from it. This helps you to</p>
-                                                <p>understand how to improve your workflows</p>
-                                                <p>and assays to get to optimal sequences faster.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-
-                                    <div className="flex gap-10 mb-10">
-                                        <div className="w-[572px] h-[448px] bg-[#f2f4f7] rounded-2xl"></div>
-
-                                        <div className="w-[572px] h-[448px] ">
-                                            <p className="font-rethink text-[#030712] text-[32px] font-semibold  tracking-tight">Explore your data quality</p>
-                                            <div className="  mt-5 text-[#616E80] font-semibold text-[16px] tracking-tight">
-                                                <p>Cradle automatically analyses your experimental</p>
-                                                <p>data to determine data quality and AI’s</p>
-                                                <p>ability to learn from it. This helps you to</p>
-                                                <p>understand how to improve your workflows</p>
-                                                <p>and assays to get to optimal sequences faster.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-
-                <div>
-                    <div className="w-full mt-10 flex flex-col items-center ">
-                        <div>
-                            <p className="text-[120px]  font-rethink font-semibold text-[#030712] ml-25">Generate</p>
-
-                            <div className="section flex gap-10  ">
-                                <div className="pin-box w-14 h-14 bg-[#3d66f8] rounded-2xl text-[24px] flex justify-center items-center font-rethink text-[#ffffff] font-semibold"><p>2</p></div>
-                                <div>
-                                    <div className="flex gap-10 mb-10">
-                                        <div className="w-[572px] h-[448px] bg-[#f2f4f7] rounded-2xl"></div>
-
-                                        <div className="w-[572px] h-[448px] ">
-                                            <p className="font-rethink text-[#030712] text-[32px] font-semibold  tracking-tight">Import your data</p>
-                                            <div className="  mt-5 text-[#616E80] font-semibold text-[16px] tracking-tight">
-                                                <p>To begin, upload wet lab data from screening</p>
-                                                <p>or optimization experiments. If you're</p>
-                                                <p>starting a project from scratch, simply</p>
-                                                <p>define your goals and assays to get going.</p>
-                                            </div>
-                                        </div>
-
-                                    </div>
-
-                                    <div className="flex gap-10 mb-10">
-                                        <div className="w-[572px] h-[448px] bg-[#f2f4f7] rounded-2xl"></div>
-
-                                        <div className="w-[572px] h-[448px] ">
-                                            <p className="font-rethink text-[#030712] text-[32px] font-semibold  tracking-tight">Explore your data quality</p>
-                                            <div className="  mt-5 text-[#616E80] font-semibold text-[16px] tracking-tight">
-                                                <p>Cradle automatically analyses your experimental</p>
-                                                <p>data to determine data quality and AI’s</p>
-                                                <p>ability to learn from it. This helps you to</p>
-                                                <p>understand how to improve your workflows</p>
-                                                <p>and assays to get to optimal sequences faster.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-
-                                    <div className="flex gap-10 mb-10">
-                                        <div className="w-[572px] h-[448px] bg-[#f2f4f7] rounded-2xl"></div>
-
-                                        <div className="w-[572px] h-[448px] ">
-                                            <p className="font-rethink text-[#030712] text-[32px] font-semibold  tracking-tight">Explore your data quality</p>
-                                            <div className="  mt-5 text-[#616E80] font-semibold text-[16px] tracking-tight">
-                                                <p>Cradle automatically analyses your experimental</p>
-                                                <p>data to determine data quality and AI’s</p>
-                                                <p>ability to learn from it. This helps you to</p>
-                                                <p>understand how to improve your workflows</p>
-                                                <p>and assays to get to optimal sequences faster.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-
-
-
-
-
-
-                <div>
-                    <div className="w-full mt-10 flex flex-col items-center ">
-                        <div>
-                            <p className="text-[120px]   font-rethink font-semibold text-[#030712] ml-25">Review</p>
-
-                            <div className="section flex gap-10  ">
-                                <div className="pin-box w-14 h-14 bg-[#3d66f8] rounded-2xl text-[24px] flex justify-center items-center font-rethink text-[#ffffff] font-semibold"><p>3</p></div>
-                                <div>
-                                    <div className="flex gap-10 mb-10">
-                                        <div className="w-[572px] h-[448px] bg-[#f2f4f7] rounded-2xl"></div>
-
-                                        <div className="w-[572px] h-[448px] ">
-                                            <p className="font-rethink text-[#030712] text-[32px] font-semibold  tracking-tight">Import your data</p>
-                                            <div className="  mt-5 text-[#616E80] font-semibold text-[16px] tracking-tight">
-                                                <p>To begin, upload wet lab data from screening</p>
-                                                <p>or optimization experiments. If you're</p>
-                                                <p>starting a project from scratch, simply</p>
-                                                <p>define your goals and assays to get going.</p>
-                                            </div>
-                                        </div>
-
-                                    </div>
-
-                                    <div className="flex gap-10 mb-10">
-                                        <div className="w-[572px] h-[448px] bg-[#f2f4f7] rounded-2xl"></div>
-
-                                        <div className="w-[572px] h-[448px] ">
-                                            <p className="font-rethink text-[#030712] text-[32px] font-semibold  tracking-tight">Explore your data quality</p>
-                                            <div className="  mt-5 text-[#616E80] font-semibold text-[16px] tracking-tight">
-                                                <p>Cradle automatically analyses your experimental</p>
-                                                <p>data to determine data quality and AI’s</p>
-                                                <p>ability to learn from it. This helps you to</p>
-                                                <p>understand how to improve your workflows</p>
-                                                <p>and assays to get to optimal sequences faster.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-
-                                    <div className="flex gap-10 mb-10">
-                                        <div className="w-[572px] h-[448px] bg-[#f2f4f7] rounded-2xl"></div>
-
-                                        <div className="w-[572px] h-[448px] ">
-                                            <p className="font-rethink text-[#030712] text-[32px] font-semibold  tracking-tight">Explore your data quality</p>
-                                            <div className="  mt-5 text-[#616E80] font-semibold text-[16px] tracking-tight">
-                                                <p>Cradle automatically analyses your experimental</p>
-                                                <p>data to determine data quality and AI’s</p>
-                                                <p>ability to learn from it. This helps you to</p>
-                                                <p>understand how to improve your workflows</p>
-                                                <p>and assays to get to optimal sequences faster.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-
-
-
-
-
-                <div>
-                    <div className="relative mt-20 w-full aspect-video bg-[url('/dashboard.png')] ">
-                        <div className="absolute inset-0 bg-linear-to-b from-black/50 via-black/60 to-black"></div>
-
-
-
-
-
-                    </div>
-                    <div className="bg-black h-200">
-
-                    </div>
-                </div>
-
-
-
-
-
-
-
-
-                <div className="bg-[#ffffff] pb-20 pt-30 w-full flex flex-col items-center">
-                    <div className=" flex gap-15 ">
-                        <div>
-                            <div className="flex  items-center gap-5 " >
-                                <div className="bg-[#3d66f8] h-2 w-2 rounded-xs  "></div>
-                                <h3 className={`text-[18px]  font-bold text-[#616E80] font-spot`}>THE CRADLE LAB</h3>
-                            </div>
-                            <div className=" text-[#030712]">
-                                <p className="font-rethink font-semibold text-[64px] h-16 tracking-tight">AI that gets better</p>
-                                <p className="font-rethink font-semibold text-[64px] h-16">every two weeks.</p>
-                            </div>
-
-                            <div className="  mt-15 text-[#616E80] font-semibold text-[20px] tracking-tight">
-                                <p>Cradle isn’t a CRO, so why do we run our own wet lab in</p>
-                                <p>Amsterdam?</p>
-
-                                <p className="mt-5">It's simple. So you get reliable and high-performing models from</p>
-                                <p>day one, while your proprietary data remains completely private.</p>
-
-                                <p className="mt-5">Much like a self-driving car company: they wouldn’t just design</p>
-                                <p>algorithms and cross their fingers. They need to test real-world</p>
-                                <p>scenarios and collect data in order to fine-tune performance. We</p>
-                                <p>take the same approach, ensuring our models are performant</p>
-                                <p>even before seeing your data.</p>
-                            </div>
-
-
-                            <button className="mt-10 border rounded-xl w-[252px] h-12 border-[#e7eaee] text-[18px] text-[#1F2937] font-semibold">Get to know our wet lab</button>
-                        </div>
-
-                        <div>
-                            <div className="w-[600px] h-[576px] border-[#e7eaee] border rounded-xl">
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <hr className="border-[#e7eaee]" />
-
-                <div className="pt-20 pb-20 bg-[#ffffff] w-full flex flex-col items-center">
-                    <div >
-                        <p className="font-rethink text-[#030712] text-[32px] font-semibold  tracking-tight">Learnings from our wet lab</p>
-                        <div className="mt-5 gap-6 flex">
-
-                            <div>
-                                <div className="w-[302px] h-40 bg-[#e7eaee] rounded-xl"></div>
-                                <div className="mt-5">
-                                    <p className="text-[16px] text-[#181717] font-semibold">Backbone of high-throughput </p>
-                                    <p className="text-[16px] text-[#181717] font-semibold">experimentation: Design principles for</p>
-                                    <p className="text-[16px] text-[#181717] font-semibold">ML-ready sample tracking</p>
-                                </div>
-                            </div>
-
-                            <div>
-                                <div className="w-[302px] h-40 bg-[#e7eaee] rounded-xl"></div>
-                                <div className="mt-5">
-                                    <p className="text-[16px] text-[#181717] font-semibold">Backbone of high-throughput </p>
-                                    <p className="text-[16px] text-[#181717] font-semibold">experimentation: Design prin</p>
-
-                                </div>
-                            </div>
-
-                            <div>
-                                <div className="w-[302px] h-40 bg-[#e7eaee] rounded-xl"></div>
-                                <div className="mt-5">
-                                    <p className="text-[16px] text-[#181717] font-semibold">Backbone of high-throughput </p>
-                                    <p className="text-[16px] text-[#181717] font-semibold">ML-ready sample tracking</p>
-                                </div>
-                            </div>
-
-                            <div>
-                                <div className="w-[302px] h-40 bg-[#e7eaee] rounded-xl"></div>
-                                <div className="mt-5">
-                                    <p className="text-[16px] text-[#181717] font-semibold">Backbone of high-throughput </p>
-                                    <p className="text-[16px] text-[#181717] font-semibold">ML-ready sample tracking</p>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-
-                </div>
-
-
-
-
-
-
-
-                <div>
-                    <div className="bg-[linear-gradient(180deg,rgb(34,78,238)_52%,rgb(45,102,248)_100%)] w-full h-200">
-
-                    </div>
-
-                    <div className="w-full h-[370px] bg-[#224eee]">
-
-                    </div>
-
-
-                    <hr className="border-[#3976c7] h-[0.5px]" />
-
-                    <div className="w-full h-[60px] bg-[#224eee] flex items-center  ">
-                        <div className="flex justify-between w-full mx-10 ">
-                            <div className="flex gap-5 text-[12px] text-[#ffffff99] font-semibold ">
-                                <p> © 2025 · Cradle is a registered trademark</p>
-                                <p>Legal Terms</p>
-                                <p>Privacy Policy</p>
-                                <p>Cookies</p>
-                            </div>
-                            <div>
-                                <p className="text-[12px] text-[#ffffff99] font-semibold ">Built with ❤️ in Amsterdam & Zurich</p>
-                            </div>
-                        </div>
-
-                    </div>
-
-
-
-                </div>
+        // Industry cards
+        industryRefs.current.forEach((el) => {
+          gsap.from(el, {
+            scale: 0.98,
+            opacity: 0,
+            duration: 0.7,
+            ease: "power3.out",
+            scrollTrigger: { trigger: el, start: "top 90%" },
+          });
+        });
+
+        // Testimonials stagger
+        gsap.from(testimonialRefs.current, {
+          y: 20,
+          opacity: 0,
+          stagger: 0.12,
+          duration: 0.8,
+          ease: "power3.out",
+          scrollTrigger: { trigger: testimonialRefs.current[0], start: "top 85%" },
+        });
+
+        // CTA entrance animation (down → up)
+        gsap.from(ctaRef.current, {
+          y: 40,
+          opacity: 0,
+          duration: 0.6,
+          ease: "power2.out"
+        });
+        gsap.from(demoCtaRef.current, {
+          y: 40,
+          opacity: 0,
+          duration: 0.6,
+          ease: "power2.out",
+          delay: 0.1
+        });
+
+        // Remove blink + float only primary CTA
+        
+        
+        
+      }
+    });
+
+    return () => ctx.revert();
+  }, []);
+
+  return (
+    <div className="w-full overflow-x-hidden font-sans">
+      {/* HERO */}
+      <section ref={heroRef} className="w-full bg-white text-center py-20 lg:py-28">
+  <h4 className="text-lg font-semibold bg-gradient-to-r from-orange-500 to-pink-600 text-transparent bg-clip-text mb-4">
+    India's modern retail POS
+  </h4>
+
+  <h1 ref={headlineRef} className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight text-[#0057e7] overflow-hidden">
+    <span className="block hero-line">The most complete retail POS</span>
+    <span className="block hero-line">designed to solve real problems.</span>
+  </h1>
+
+  <p className="max-w-3xl mx-auto mt-6 text-[#1a1a1a] text-lg leading-relaxed">
+    We help retailers eliminate stockouts, speed up billing, simplify inventory, and increase profits. 
+    A powerful POS that fixes everyday store challenges — all in one platform.
+  </p>
+
+  <div className="flex justify-center gap-4 mt-10">
+    <a ref={ctaRef} href="#pricing" className="bg-red-600 hover:bg-red-700 text-white font-semibold rounded-full px-6 py-3 shadow-md">
+      GET STARTED FOR FREE
+    </a>
+    <a ref={demoCtaRef} href="#demo" className="border border-black rounded-full px-6 py-3 font-semibold text-black">
+      GET A DEMO
+    </a>
+  </div>
+</section>
+
+      {/* PROBLEM SECTION */}
+      <section className="max-w-7xl mx-auto px-6 py-20" id="problems">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          <div className="lg:col-span-6">
+            <h2 className="text-3xl font-extrabold text-[#071025]">Retail challenges we solve</h2>
+            <p className="mt-4 text-[#334155] max-w-xl">From inventory surprises to slow checkouts — retailers lose revenue every day. Here’s how we fix it.</p>
+
+            <ul className="mt-8 space-y-4">
+              {['Stockouts cost sales','Slow, error-prone checkout','Disconnected reporting','Manual reconciliations'].map((p, i) => (
+                <li key={p} ref={(el)=>setRef(problemRefs, el)} className="flex gap-4 items-start">
+                  <div className="w-10 h-10 bg-indigo-600 text-white rounded-md flex items-center justify-center font-semibold">{i+1}</div>
+                  <div>
+                    <div className="font-semibold text-[#0f172a]">{p}</div>
+                    <div className="text-[#475569]">We reduce stockouts with reorder triggers, intelligent forecasting and easy supplier workflows.</div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+
+          </div>
+
+          <div className="lg:col-span-6">
+            <div className="w-full h-80 rounded-xl border border-gray-100 shadow-lg overflow-hidden">
+  <img src="/dashboard.png" alt="Retail POS" className="w-full h-full object-cover" />
+</div>
+          </div>
+        </div>
+      </section>
+
+      {/* FEATURES */}
+      <section id="features" className="bg-[#f8fafc] py-20">
+        <div className="max-w-7xl mx-auto px-6">
+          <h3 className="text-3xl font-extrabold text-[#0f172a]">Powerful features for retail teams</h3>
+          <p className="text-[#64748b] mt-2 max-w-2xl">Everything you need to run stores — inventory, checkout, CRM, and analytics — in a single product.</p>
+
+          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              {title:'Inventory intelligence', desc:'Forecast demand, automate reorder and track batches.'},
+              {title:'Fast checkout', desc:'Barcode scanning, split payments and receipts.'},
+              {title:'Offline mode', desc:'Continue selling even without internet.'},
+              {title:'Multi‑store', desc:'Centralized control across outlets.'},
+              {title:'Reports & analytics', desc:'Actionable dashboards for your P&L.'},
+              {title:'Integrations', desc:'Payments, accounting, e‑commerce.'}
+            ].map((f, i) => (
+              <div key={f.title} ref={(el)=>setRef(featureRefs, el)} className="bg-white rounded-2xl p-6 shadow-sm">
+                <div className="w-12 h-12 bg-indigo-50 rounded-lg flex items-center justify-center font-bold text-indigo-600">{i+1}</div>
+                <h4 className="mt-4 font-semibold text-[#0f172a]">{f.title}</h4>
+                <p className="mt-2 text-[#64748b]">{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* INDUSTRIES */}
+      <section className="max-w-7xl mx-auto px-6 py-20">
+        <h3 className="text-3xl font-extrabold text-[#071025]">Works for every kind of store</h3>
+        <p className="text-[#64748b] mt-2 max-w-2xl">From single‑shop boutiques to grocery chains — here are use cases we frequently help.</p>
+
+        <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+          {['Apparel','Grocery','Pharmacy','Electronics','Home & Decor','Cafes'].map((g,i)=> (
+            <div key={g} ref={(el)=>setRef(industryRefs, el)} className="bg-white rounded-lg p-4 shadow-sm flex flex-col items-center gap-3">
+              <div className="w-16 h-16 bg-indigo-50 rounded-md flex items-center justify-center font-semibold text-indigo-600">{g[0]}</div>
+              <div className="text-sm font-semibold">{g}</div>
             </div>
-        </>
-    )
-}
+          ))}
+        </div>
+      </section>
 
-export default homepage
+      {/* DEMO / VISUAL WORKFLOW */}
+      <section id="demo" className="bg-white py-24">
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div className="lg:col-span-6">
+            <h3 className="text-3xl font-extrabold text-[#071025]">See it in action</h3>
+            <p className="mt-4 text-[#64748b] max-w-xl">A quick walkthrough of a sale — from scan to receipt to inventory update, all visible in seconds.</p>
+
+            <ul className="mt-6 space-y-4 text-[#334155]">
+              <li>• Scan item → add to cart</li>
+              <li>• Split or card payments</li>
+              <li>• Automated stock decrement and reorder hints</li>
+            </ul>
+
+            <div className="mt-8">
+              <a href="#" className="inline-flex items-center gap-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-full px-6 py-3">Request demo</a>
+            </div>
+          </div>
+
+          <div className="lg:col-span-6">
+            <div className="w-full h-72 rounded-xl border border-gray-100 shadow-lg overflow-hidden">
+  <img src="/dashboard.png" alt="Retail POS Demo" className="w-full h-full object-cover" />
+</div>
+          </div>
+        </div>
+      </section>
+
+      {/* TESTIMONIALS */}
+      <section className="max-w-7xl mx-auto px-6 py-20 bg-[#f8fafc]">
+        <h3 className="text-3xl font-extrabold text-[#071025]">What retailers say</h3>
+        <p className="text-[#64748b] mt-2 max-w-2xl">Real stores, real results.</p>
+
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[1,2,3].map((n,i)=> (
+            <div key={n} ref={(el)=>setRef(testimonialRefs, el)} className="bg-white rounded-2xl p-6 shadow">
+              <div className="text-[#0f172a] font-semibold">Store {n}</div>
+              <div className="text-[#64748b] mt-2">“Using this POS we cut stockouts by 40% and checkout time by half.”</div>
+              <div className="mt-4 text-sm text-[#94a3b8]">— Retailer, City</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* PRICING / CTA */}
+      <section id="pricing" className="py-20">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <h3 className="text-3xl font-extrabold text-[#071025]">Simple pricing for stores of all sizes</h3>
+          <p className="text-[#64748b] mt-2 max-w-2xl mx-auto">Start with a free trial — scale with add‑ons as you grow.</p>
+
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white rounded-2xl p-6 shadow">
+              <div className="text-xl font-bold">Starter</div>
+              <div className="mt-3 text-3xl font-extrabold">Free</div>
+              <div className="mt-3 text-[#64748b]">Basic features for single shops</div>
+              <a className="mt-6 inline-block bg-indigo-600 text-white px-4 py-2 rounded-full">Get started</a>
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 shadow border-2 border-indigo-600">
+              <div className="text-xl font-bold">Growth</div>
+              <div className="mt-3 text-3xl font-extrabold">₹999/mo</div>
+              <div className="mt-3 text-[#64748b]">For growing stores and multiple outlets</div>
+              <a className="mt-6 inline-block bg-indigo-600 text-white px-4 py-2 rounded-full">Start trial</a>
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 shadow">
+              <div className="text-xl font-bold">Enterprise</div>
+              <div className="mt-3 text-3xl font-extrabold">Custom</div>
+              <div className="mt-3 text-[#64748b]">Tailored for retail chains</div>
+              <a className="mt-6 inline-block bg-indigo-600 text-white px-4 py-2 rounded-full">Talk to sales</a>
+            </div>
+          </div>
+
+          <div className="mt-10">
+            <a href="#" className="inline-flex items-center gap-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-full px-6 py-3">Start free trial</a>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="max-w-7xl mx-auto px-6 py-16 bg-white">
+        <h3 className="text-2xl font-extrabold text-[#071025]">Frequently asked questions</h3>
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[
+            {q:'How long to onboard?', a:'You can onboard in under 30 minutes with our CSV importer.'},
+            {q:'Does it work offline?', a:'Yes — sales continue offline and sync when online.'},
+            {q:'Payments supported?', a:'We support most card payments and UPI integrations.'},
+            {q:'Migration help?', a:'Yes — free migration for the first 3 months.'}
+          ].map((f)=> (
+            <details key={f.q} className="p-4 border rounded-lg">
+              <summary className="font-semibold cursor-pointer">{f.q}</summary>
+              <p className="mt-2 text-[#64748b]">{f.a}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="bg-[#061026] text-white py-10">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+          <div>
+            <div className="font-bold text-xl">RetailPOS</div>
+            <div className="text-sm text-white/70 mt-2">Built for retailers • © {new Date().getFullYear()}</div>
+          </div>
+
+          <div className="flex gap-6 text-sm text-white/70">
+            <a>Terms</a>
+            <a>Privacy</a>
+            <a>Contact</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
