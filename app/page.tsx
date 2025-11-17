@@ -34,28 +34,32 @@ export default function LongLandingWithGSAP() {
       if (!disableAnimations) {
         // Hero entrance
         const tl = gsap.timeline();
+        const heroLines = headlineRef.current ? headlineRef.current.querySelectorAll('.hero-line') : [];
         tl.from(badgeRef.current, { y: -40, opacity: 0, duration: 0.6, ease: "power2.out" })
-          .from(headlineRef.current?.querySelectorAll('.hero-line'), {
+          .from(heroLines, {
             y: -60,
             opacity: 0,
             duration: 0.9,
             stagger: 0.2,
             ease: "power3.out"
-          }, "-=0.2")
-          .from(heroRef.current?.querySelector('p'), {
+          }, "-=0.2");
+
+        const heroP = heroRef.current?.querySelector('p');
+        if (heroP) {
+          tl.from(heroP, {
             y: -40,
             opacity: 0,
             duration: 0.7,
             ease: "power2.out"
-          }, "-=0.3")
-          .from([ctaRef.current, demoCtaRef.current], {
+          }, "-=0.3");
+        }
+        tl.from([ctaRef.current, demoCtaRef.current], {
             y: 40,
             opacity: 0,
             duration: 0.6,
             ease: "power2.out"
           })
-          
-          .from(cardRefs.current, {
+        tl.from(cardRefs.current, {
             y: -20,
             opacity: 0,
             stagger: 0.08,
@@ -151,7 +155,7 @@ export default function LongLandingWithGSAP() {
     <div className="w-full overflow-x-hidden font-sans">
       {/* HERO */}
       <section ref={heroRef} className="w-full bg-white text-center py-20 lg:py-28">
-  <h4 className="text-lg font-semibold bg-gradient-to-r from-orange-500 to-pink-600 text-transparent bg-clip-text mb-4">
+  <h4 className="text-lg font-semibold bg-linear-to-r from-orange-500 to-pink-600 text-transparent bg-clip-text mb-4">
     India's modern retail POS
   </h4>
 
